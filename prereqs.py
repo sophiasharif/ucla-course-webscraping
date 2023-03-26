@@ -1,4 +1,5 @@
-department_to_code = {"Mathematics": "MATH", "Program in Computing": "PIC", "Computer Science": "COM SCI", "Civil and Environmental Engineering": "C&EE", "Electrical and Computer Engineering": "EC ENGR", "Statistics": "STATS", "Physics": "PHYSICS"}
+from utils import DEPARTMENT_ABBREVIATIONS
+
 
 def parse_prerequisites(prerequisites: str):
     # edge case
@@ -6,8 +7,8 @@ def parse_prerequisites(prerequisites: str):
         return []
 
     # change departments to abbreviations
-    for dept in department_to_code:
-        prerequisites = prerequisites.replace(dept, department_to_code[dept])
+    for dept in DEPARTMENT_ABBREVIATIONS:
+        prerequisites = prerequisites.replace(dept, DEPARTMENT_ABBREVIATIONS[dept])
 
     # Separate required courses and optional groups
     components = split_string(prerequisites)
