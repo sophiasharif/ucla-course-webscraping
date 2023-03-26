@@ -1,29 +1,15 @@
 from selenium import webdriver
-import pandas as pd
+from prereqs import scrape_reqs
 
-website = "https://catalog.registrar.ucla.edu/major/2022/AppliedMathematicsBS"
+# set up driver
 path = "/Users/sophiasharif/Desktop/projects/chromedriver_mac64/chromedriver"
-driver = webdriver.Chrome(path)
-driver.get(website)
-single_option_reqs = driver.find_elements_by_xpath('//div[@data-level="1"]//a[@tabindex="-1"]')
+webdriver = webdriver.Chrome(path)
 
-codes = []
-names = []
-links = []
+website = "https://sa.ucla.edu/ro/Public/SOC/Results/ClassDetail?term_cd=23S&subj_area_cd=COM%20SCI&crs_catlg_no=0146%20%20M%20&class_id=187576200&class_no=%20001%20%20"
 
-for match in single_option_reqs:
-    text = driver.execute_script("return arguments[0].textContent;", match).strip()
-    partition = text.find('-')
-    code = text[0:partition-1]
-    name = text[partition+2:]
-    link = match.get_attribute('href')
-    codes.append(code)
-    names.append(name)
-    links.append(link)
+prereqs, coreqs = scrape_reqs(website, webdriver)
+print(prereqs)
+print(coreqs)
+print(type(webdriver))
 
-df = pd.DataFrame({'code': codes, 'name': names, 'link': links})
-df.to_csv('applied_mathematics.csv')
-df.to_json('applied_mathematics.json')
-print(df)
-
-driver.quit()
+webdriver.quit()

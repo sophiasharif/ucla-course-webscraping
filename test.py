@@ -1,5 +1,6 @@
 department_to_code = {"Mathematics": "MATH", "Program in Computing": "PIC", "Computer Science": "COM SCI", "Civil and Environmental Engineering": "C&EE", "Electrical and Computer Engineering": "EC ENGR", "Statistics": "STATS", "Physics": "PHYSICS"}
 
+
 def parse_prerequisites(prerequisites: str):
     # edge case
     if prerequisites == "":
@@ -58,27 +59,5 @@ def split_string(input_string):
 
     return res
 
-
-def scrape_reqs(website: str, driver) :
-    driver.get(website)
-
-    # locate pre-req table
-    host_element = driver.find_element_by_tag_name("ucla-sa-soc-app")
-    shadow_root = driver.execute_script("return arguments[0].shadowRoot", host_element)
-    table = driver.execute_script("return arguments[0].getElementById('course_requisites')", shadow_root)
-    rows = driver.execute_script("return arguments[0].querySelectorAll('tr')", table)
-
-    # create infix pre-req data string
-    prereqs = ""
-    coreqs = ""
-    for row in rows[1:]:
-        cells = driver.execute_script("return arguments[0].querySelectorAll('td')", row)
-        course = cells[0].text
-        # check if it's co-requisite
-        if cells[3].text == "Yes":
-            coreqs += course + " "
-        prereqs += course + " "
-
-    return parse_prerequisites(prereqs), parse_prerequisites(coreqs)
-
-
+test = "Mathematics 32B and Mathematics 33B and Mathematics 115A and ( Program in Computing 10A or Computer Science 31)	"
+print(parse_prerequisites(test))
