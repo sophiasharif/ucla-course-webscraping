@@ -1,5 +1,5 @@
 from selenium import webdriver
-from prereqs import scrape_reqs
+
 
 def get_link_from_course_button(button, shadow_root, driver):
     # open course
@@ -59,19 +59,9 @@ def get_course_links_from_page(url, driver):
         link = get_link_from_course_button(button, shadow_root, driver)
         # if getting link failed, change to None
         if link == 'javascript:void(0)':
-            link = None
+            continue
         course_links[course_name] = link
 
     return course_links
 
 
-website = "https://sa.ucla.edu/ro/public/soc/Results?SubjectAreaName=Mathematics+(MATH)&t=23W&sBy=subject&subj=MATH+++&catlg=&cls_no=&undefined=Go&btnIsInIndex=btn_inIndex"
-path = "/Users/sophiasharif/Desktop/projects/chromedriver_mac64/chromedriver"
-driver = webdriver.Chrome(path)
-
-links = get_course_links_from_page(website, driver)
-print(links)
-
-# print("Scraping " + link)
-# reqs, prereqs = scrape_reqs(link, driver)
-# print(reqs)

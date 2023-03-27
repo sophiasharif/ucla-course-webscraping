@@ -60,7 +60,7 @@ def split_string(input_string):
     return res
 
 
-def scrape_reqs(website: str, driver) :
+def scrape_reqs(website: str, driver):
     driver.get(website)
 
     # locate pre-req table
