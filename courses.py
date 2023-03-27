@@ -1,18 +1,7 @@
 from selenium import webdriver
 from prereqs import scrape_reqs
 
-website = "https://sa.ucla.edu/ro/public/soc/Results?SubjectAreaName=Mathematics+(MATH)&t=23W&sBy=subject&subj=MATH+++&catlg=&cls_no=&undefined=Go&btnIsInIndex=btn_inIndex"
-path = "/Users/sophiasharif/Desktop/projects/chromedriver_mac64/chromedriver"
-driver = webdriver.Chrome(path)
-driver.get(website)
-
-# get all course buttons
-host_element = driver.find_element_by_tag_name("ucla-sa-soc-app")
-shadow_root = driver.execute_script("return arguments[0].shadowRoot", host_element)
-courses = driver.execute_script("return arguments[0].getElementById('resultsTitle')", shadow_root)
-buttons = driver.execute_script("return arguments[0].querySelectorAll('button')", courses)
-
-def get_link_from_course_button(button):
+def get_link_from_course_button(button, shadow_root, driver):
     # open course
     button.click()
 
@@ -45,16 +34,43 @@ def get_link_from_course_button(button):
     return more_details_link.get_attribute("href")
 
 
-course_links = []
-for button in reversed(buttons):
-    link = get_link_from_course_button(button)
-    # if getting link failed, change to None
-    if link == 'javascript:void(0)':
-        link = None
-    course_links.append(link)
+def get_course_links_from_page(url, driver):
 
-print(course_links)
+    # open page
+    driver.get(url)
 
+    # get department
+
+    # get all course buttons
+    host_element = driver.find_element_by_tag_name("ucla-sa-soc-app")
+    shadow_root = driver.execute_script("return arguments[0].shadowRoot", host_element)
+    courses = driver.execute_script("return arguments[0].getElementById('resultsTitle')", shadow_root)
+    buttons = driver.execute_script("return arguments[0].querySelectorAll('button')", courses)
+
+    # get department abbreviation
+    dept = driver.execute_script("return arguments[0].getElementById('spanSearchResultsHeader')", shadow_root).text
+    dept_abbr = dept[dept.find('(')+1:dept.find(')')]
+
+    course_links = {}
+    for button in reversed(buttons):
+        course = button.text
+        first_space = course.find(' ')
+        course_name = f"{dept_abbr} {course[:first_space]}"
+        link = get_link_from_course_button(button, shadow_root, driver)
+        # if getting link failed, change to None
+        if link == 'javascript:void(0)':
+            link = None
+        course_links[course_name] = link
+
+    return course_links
+
+
+website = "https://sa.ucla.edu/ro/public/soc/Results?SubjectAreaName=Mathematics+(MATH)&t=23W&sBy=subject&subj=MATH+++&catlg=&cls_no=&undefined=Go&btnIsInIndex=btn_inIndex"
+path = "/Users/sophiasharif/Desktop/projects/chromedriver_mac64/chromedriver"
+driver = webdriver.Chrome(path)
+
+links = get_course_links_from_page(website, driver)
+print(links)
 
 # print("Scraping " + link)
 # reqs, prereqs = scrape_reqs(link, driver)
