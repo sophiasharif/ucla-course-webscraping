@@ -21,19 +21,39 @@ def get_link_from_course_button(button):
     container_id = button_id.replace("title", "container")
     script = f"return arguments[0].getElementById('{container_id}')"
     class_info = driver.execute_script(script, shadow_root)
+
+    while not class_info:
+        driver.implicitly_wait(2)
+        class_info = driver.execute_script(script, shadow_root)
+
     icon = driver.execute_script("return arguments[0].querySelector('i.icon-warning-sign')", class_info)
+
+    while not icon:
+        icon = driver.execute_script("return arguments[0].querySelector('i.icon-info-sign')", class_info)
+        if icon:
+            break;
+        driver.implicitly_wait(2)
+        icon = driver.execute_script("return arguments[0].querySelector('i.icon-warning-sign')", class_info)
+
     icon.click()
 
     # wait for popup to load
-    driver.implicitly_wait(1)
+    driver.implicitly_wait(2)
 
     # get the link and return it
     more_details_link = driver.execute_script("return arguments[0].querySelector('a')", class_info)
     return more_details_link.get_attribute("href")
 
 
-print(get_link_from_course_button(buttons[7]))
-print(get_link_from_course_button(buttons[0]))
+course_links = []
+for button in reversed(buttons):
+    link = get_link_from_course_button(button)
+    # if getting link failed, change to None
+    if link == 'javascript:void(0)':
+        link = None
+    course_links.append(link)
+
+print(course_links)
 
 
 # print("Scraping " + link)
