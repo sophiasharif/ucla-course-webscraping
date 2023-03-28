@@ -1,6 +1,5 @@
 from selenium import webdriver
-import pandas as pd
-
+import json
 
 def get_major_courses(website, driver):
     driver.get(website)
@@ -14,16 +13,8 @@ def get_major_courses(website, driver):
         codes.append(code)
     return codes
 
+def scrape_major_to_json(website, file_name, driver):
+    major = get_major_courses(website, driver)
 
-website = "https://catalog.registrar.ucla.edu/major/2022/AppliedMathematicsBS"
-path = "/Users/sophiasharif/Desktop/projects/chromedriver_mac64/chromedriver"
-driver = webdriver.Chrome(path)
-
-data = {"Computer Science BS": get_major_courses(website, driver)}
-
-df = pd.DataFrame(data)
-# df.to_csv('applied_mathematics.csv')
-df.to_json('applied_mathematics.json')
-print(df)
-
-driver.quit()
+    with open(f'./data/major-courses/{file_name}.json', 'w') as file:
+        json.dump(major, file)
