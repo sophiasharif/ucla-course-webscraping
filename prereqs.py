@@ -16,7 +16,7 @@ def parse_prerequisites(prerequisites: str):
 
     for component in components:
         # If there are parentheses, it's an optional group
-        if '(' in component:
+        if ' or ' in component:
             optional_courses = component.split(' or ')
             parsed_output.append([course.strip("() ") for course in optional_courses])
         else:
@@ -60,18 +60,31 @@ def split_string(input_string):
     return res
 
 
-def scrape_reqs(website: str, driver):
+def scrape_class_info(website: str, driver) -> dict:
+
     driver.get(website)
+    course_info = {}
 
     # locate pre-req table
     host_element = driver.find_element_by_tag_name("ucla-sa-soc-app")
     shadow_root = driver.execute_script("return arguments[0].shadowRoot", host_element)
-    table = driver.execute_script("return arguments[0].getElementById('course_requisites')", shadow_root)
-    rows = driver.execute_script("return arguments[0].querySelectorAll('tr')", table)
 
-    # create infix pre-req data string
+    # get title
+    title_div = driver.execute_script("return arguments[0].getElementById('subject_class')", shadow_root)
+    title = title_div.text
+    topic = title[title.find('-') + 2:]
+    course_info['title'] = topic
+
+    # get description
+    description_div = driver.execute_script("return arguments[0].getElementById('section')", shadow_root)
+    description = driver.execute_script("return arguments[0].querySelector('p.section_data')", description_div)
+    course_info['description'] = description.text
+
+    # get prereqs and coreqs
     prereqs = ""
     coreqs = ""
+    table = driver.execute_script("return arguments[0].getElementById('course_requisites')", shadow_root)
+    rows = driver.execute_script("return arguments[0].querySelectorAll('tr')", table)
     for row in rows[1:]:
         cells = driver.execute_script("return arguments[0].querySelectorAll('td')", row)
         course = cells[0].text
@@ -79,7 +92,8 @@ def scrape_reqs(website: str, driver):
         if cells[3].text == "Yes":
             coreqs += course + " "
         prereqs += course + " "
+    course_info["pre-reqs"] = parse_prerequisites(prereqs)
+    course_info["co-reqs"] = parse_prerequisites(coreqs)
 
-    return parse_prerequisites(prereqs), parse_prerequisites(coreqs)
-
+    return course_info
 
